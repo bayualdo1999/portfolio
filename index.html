@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vexora — Where Ideas Ignite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a08;
+      --fg: #f0ede6;
+      --accent: #e8ff47;
+      --accent2: #ff4d1c;
+      --muted: #3a3a32;
+      --subtle: #1e1e18;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* CURSOR */
+    .cursor {
+      position: fixed;
+      width: 12px; height: 12px;
+      background: var(--accent);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transition: transform 0.15s ease, width 0.2s ease, height 0.2s ease;
+      transform: translate(-50%, -50%);
+    }
+    .cursor-ring {
+      position: fixed;
+      width: 36px; height: 36px;
+      border: 1px solid rgba(232,255,71,0.4);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transition: transform 0.35s ease, width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
+      transform: translate(-50%, -50%);
+    }
+    body:hover .cursor-ring { opacity: 1; }
+
+    /* NOISE OVERLAY */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.04;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 48px;
+      mix-blend-mode: normal;
+    }
+    nav::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(10,10,8,0.9), transparent);
+      z-index: -1;
+    }
+    .nav-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      letter-spacing: 0.08em;
+      color: var(--fg);
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--accent); }
+    .nav-links {
+      display: flex;
+      gap: 40px;
+      list-style: none;
+    }
+    .nav-links a {
+      color: rgba(240,237,230,0.55);
+      text-decoration: none;
+      font-size: 13px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+      font-weight: 400;
+    }
+    .nav-links a:hover { color: var(--fg); }
+    .nav-cta {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      padding: 10px 22px;
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
+      cursor: none;
+      letter-spacing: 0.05em;
+      font-weight: 700;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .nav-cta:hover { background: #fff; transform: translateY(-1px); }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 0 48px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-bg-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(180px, 28vw, 480px);
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(240,237,230,0.05);
+      white-space: nowrap;
+      user-select: none;
+      pointer-events: none;
+      letter-spacing: -0.02em;
+      animation: drift 20s linear infinite;
+    }
+    @keyframes drift {
+      0% { transform: translate(-50%, -50%) translateX(0); }
+      50% { transform: translate(-50%, -50%) translateX(-3%); }
+      100% { transform: translate(-50%, -50%) translateX(0); }
+    }
+
+    .hero-tag {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.2s forwards;
+    }
+    .hero-tag::before { content: '[ '; }
+    .hero-tag::after { content: ' ]'; }
+
+    .hero-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(72px, 13vw, 200px);
+      line-height: 0.9;
+      letter-spacing: -0.01em;
+      margin-bottom: 40px;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.4s forwards;
+    }
+    .hero-title em {
+      font-style: normal;
+      -webkit-text-stroke: 1px var(--fg);
+      color: transparent;
+    }
+    .hero-title .accent-word { color: var(--accent); }
+
+    .hero-bottom {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 40px;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.6s forwards;
+    }
+    .hero-desc {
+      max-width: 340px;
+      font-size: 16px;
+      line-height: 1.65;
+      color: rgba(240,237,230,0.6);
+    }
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .btn-primary {
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      padding: 16px 36px;
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
+      cursor: none;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      transition: background 0.2s, transform 0.15s;
+      display: inline-block;
+      text-decoration: none;
+    }
+    .btn-primary:hover { background: #fff; transform: translateY(-2px); }
+    .btn-ghost {
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      padding: 16px 36px;
+      background: transparent;
+      color: var(--fg);
+      border: 1px solid rgba(240,237,230,0.2);
+      cursor: none;
+      font-weight: 400;
+      letter-spacing: 0.06em;
+      transition: border-color 0.2s, transform 0.15s;
+      text-decoration: none;
+    }
+    .btn-ghost:hover { border-color: var(--fg); transform: translateY(-2px); }
+
+    /* SCROLLING TICKER */
+    .ticker {
+      background: var(--accent);
+      overflow: hidden;
+      padding: 14px 0;
+    }
+    .ticker-inner {
+      display: flex;
+      white-space: nowrap;
+      animation: ticker 22s linear infinite;
+    }
+    .ticker-item {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px;
+      letter-spacing: 0.1em;
+      color: var(--bg);
+      padding: 0 48px;
+      display: flex;
+      align-items: center;
+      gap: 48px;
+    }
+    .ticker-item::after {
+      content: '✦';
+      font-size: 12px;
+    }
+    @keyframes ticker {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* ABOUT */
+    .about {
+      padding: 120px 48px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+    .about-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      margin-bottom: 24px;
+    }
+    .about-heading {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(48px, 6vw, 96px);
+      line-height: 0.95;
+      margin-bottom: 32px;
+    }
+    .about-heading span { color: var(--accent); }
+    .about-body {
+      font-size: 16px;
+      line-height: 1.75;
+      color: rgba(240,237,230,0.6);
+      margin-bottom: 40px;
+    }
+    .about-stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+    }
+    .stat-box {
+      background: var(--subtle);
+      padding: 32px 28px;
+      border-left: 3px solid var(--accent);
+    }
+    .stat-number {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 56px;
+      line-height: 1;
+      color: var(--fg);
+      margin-bottom: 6px;
+    }
+    .stat-number span { color: var(--accent); font-size: 40px; }
+    .stat-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: rgba(240,237,230,0.4);
+      font-family: 'Space Mono', monospace;
+    }
+
+    /* SERVICES */
+    .services {
+      padding: 80px 48px 120px;
+    }
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 60px;
+      border-bottom: 1px solid var(--muted);
+      padding-bottom: 24px;
+    }
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(40px, 5vw, 72px);
+      letter-spacing: 0.02em;
+    }
+    .section-count {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      color: rgba(240,237,230,0.35);
+      letter-spacing: 0.1em;
+    }
+
+    .service-list { display: flex; flex-direction: column; }
+    .service-item {
+      display: grid;
+      grid-template-columns: 80px 1fr auto;
+      gap: 40px;
+      align-items: center;
+      padding: 36px 0;
+      border-bottom: 1px solid var(--muted);
+      transition: padding-left 0.3s ease;
+      cursor: none;
+    }
+    .service-item:hover { padding-left: 16px; }
+    .service-item:hover .service-arrow { transform: translateX(6px); color: var(--accent); }
+    .service-num {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      color: rgba(240,237,230,0.3);
+      letter-spacing: 0.1em;
+    }
+    .service-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(28px, 3.5vw, 52px);
+      letter-spacing: 0.02em;
+    }
+    .service-tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .service-tag {
+      font-size: 11px;
+      font-family: 'Space Mono', monospace;
+      padding: 5px 12px;
+      border: 1px solid var(--muted);
+      color: rgba(240,237,230,0.45);
+      letter-spacing: 0.08em;
+    }
+    .service-arrow {
+      font-size: 22px;
+      color: rgba(240,237,230,0.25);
+      transition: transform 0.3s ease, color 0.2s;
+      grid-column: 3;
+    }
+
+    /* WORK GRID */
+    .work {
+      padding: 0 48px 120px;
+    }
+    .work-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px;
+    }
+    .work-card {
+      position: relative;
+      aspect-ratio: 4/3;
+      overflow: hidden;
+      cursor: none;
+    }
+    .work-card:first-child { grid-column: 1 / -1; aspect-ratio: 16/7; }
+    .work-card-bg {
+      position: absolute;
+      inset: 0;
+      transition: transform 0.6s ease;
+    }
+    .work-card:hover .work-card-bg { transform: scale(1.05); }
+    .card-1 { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); }
+    .card-2 { background: linear-gradient(135deg, #2d1b00 0%, #5c3100 100%); }
+    .card-3 { background: linear-gradient(135deg, #0d2818 0%, #1a5c3a 100%); }
+    .card-4 { background: linear-gradient(225deg, #2a0a2e 0%, #1a0020 100%); }
+
+    .card-grid-deco {
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    .work-card-content {
+      position: absolute;
+      inset: 0;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      background: linear-gradient(to top, rgba(10,10,8,0.85) 0%, transparent 60%);
+      transition: background 0.3s;
+    }
+    .work-card:hover .work-card-content {
+      background: linear-gradient(to top, rgba(10,10,8,0.9) 0%, rgba(10,10,8,0.1) 70%);
+    }
+    .work-category {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    .work-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(28px, 3vw, 48px);
+      line-height: 0.95;
+    }
+
+    /* CTA SECTION */
+    .cta-section {
+      margin: 0 48px 80px;
+      background: var(--accent);
+      padding: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-bg-text {
+      position: absolute;
+      right: -20px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 160px;
+      color: rgba(10,10,8,0.06);
+      white-space: nowrap;
+      user-select: none;
+      pointer-events: none;
+    }
+    .cta-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(48px, 6vw, 88px);
+      color: var(--bg);
+      line-height: 0.95;
+    }
+    .btn-dark {
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      padding: 18px 44px;
+      background: var(--bg);
+      color: var(--fg);
+      border: none;
+      cursor: none;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      flex-shrink: 0;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-dark:hover { background: #1e1e18; transform: translateY(-2px); }
+
+    /* FOOTER */
+    footer {
+      padding: 60px 48px 40px;
+      border-top: 1px solid var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+    .footer-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 32px;
+      letter-spacing: 0.08em;
+    }
+    .footer-logo span { color: var(--accent); }
+    .footer-copy {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: rgba(240,237,230,0.3);
+      letter-spacing: 0.08em;
+    }
+    .footer-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+    .footer-links a {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: rgba(240,237,230,0.35);
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--accent); }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      nav { padding: 20px 24px; }
+      .nav-links { display: none; }
+      .hero { padding: 0 24px 60px; }
+      .hero-bottom { flex-direction: column; align-items: flex-start; }
+      .about { grid-template-columns: 1fr; padding: 80px 24px; }
+      .services { padding: 60px 24px 80px; }
+      .work { padding: 0 24px 80px; }
+      .work-grid { grid-template-columns: 1fr; }
+      .work-card:first-child { grid-column: 1; }
+      .service-item { grid-template-columns: 50px 1fr; gap: 20px; }
+      .service-arrow { display: none; }
+      .service-tags { display: none; }
+      .cta-section { padding: 48px 32px; flex-direction: column; margin: 0 24px 60px; }
+      footer { padding: 40px 24px; flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-logo">Vex<span>o</span>ra</a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#services">Services</a></li>
+      <li><a href="#work">Work</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <button class="nav-cta">Get Started</button>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg-text">VEXORA</div>
+    <p class="hero-tag">Creative Studio · Est. 2024</p>
+    <h1 class="hero-title">
+      We Build<br>
+      <em>Bold</em><br>
+      <span class="accent-word">Ideas.</span>
+    </h1>
+    <div class="hero-bottom">
+      <p class="hero-desc">
+        A forward-thinking creative studio helping brands break through the noise — with design that demands attention and strategy that actually works.
+      </p>
+      <div class="hero-actions">
+        <a href="#work" class="btn-primary">View Our Work</a>
+        <a href="#contact" class="btn-ghost">Let's Talk</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- TICKER -->
+  <div class="ticker">
+    <div class="ticker-inner">
+      <div class="ticker-item">Brand Identity</div>
+      <div class="ticker-item">Web Design</div>
+      <div class="ticker-item">Motion & Animation</div>
+      <div class="ticker-item">Strategy</div>
+      <div class="ticker-item">Digital Campaigns</div>
+      <div class="ticker-item">Art Direction</div>
+      <div class="ticker-item">UI/UX Design</div>
+      <div class="ticker-item">Brand Identity</div>
+      <div class="ticker-item">Web Design</div>
+      <div class="ticker-item">Motion & Animation</div>
+      <div class="ticker-item">Strategy</div>
+      <div class="ticker-item">Digital Campaigns</div>
+      <div class="ticker-item">Art Direction</div>
+      <div class="ticker-item">UI/UX Design</div>
+    </div>
+  </div>
+
+  <!-- ABOUT -->
+  <section class="about" id="about">
+    <div class="reveal">
+      <p class="about-label">// About Us</p>
+      <h2 class="about-heading">We Don't<br>Do <span>Average.</span></h2>
+      <p class="about-body">
+        Vexora is a boutique creative studio obsessed with craft. We partner with ambitious brands to create visual identities, digital experiences, and campaigns that leave a lasting impression.
+        <br><br>
+        No templates. No shortcuts. Just work that actually moves people.
+      </p>
+      <a href="#services" class="btn-primary">Explore Services</a>
+    </div>
+    <div class="about-stat-grid reveal">
+      <div class="stat-box">
+        <div class="stat-number">120<span>+</span></div>
+        <div class="stat-label">Projects Done</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">48<span>+</span></div>
+        <div class="stat-label">Happy Clients</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">6<span>yr</span></div>
+        <div class="stat-label">Experience</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">12<span>+</span></div>
+        <div class="stat-label">Awards Won</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="services" id="services">
+    <div class="section-header reveal">
+      <h2 class="section-title">Services</h2>
+      <span class="section-count">04 / OFFERINGS</span>
+    </div>
+    <div class="service-list">
+      <div class="service-item reveal">
+        <span class="service-num">01</span>
+        <span class="service-name">Brand Identity</span>
+        <div class="service-tags">
+          <span class="service-tag">Logo</span>
+          <span class="service-tag">Guidelines</span>
+          <span class="service-tag">Naming</span>
+        </div>
+        <span class="service-arrow">→</span>
+      </div>
+      <div class="service-item reveal">
+        <span class="service-num">02</span>
+        <span class="service-name">Web Design & Dev</span>
+        <div class="service-tags">
+          <span class="service-tag">UI/UX</span>
+          <span class="service-tag">Frontend</span>
+          <span class="service-tag">CMS</span>
+        </div>
+        <span class="service-arrow">→</span>
+      </div>
+      <div class="service-item reveal">
+        <span class="service-num">03</span>
+        <span class="service-name">Motion & Video</span>
+        <div class="service-tags">
+          <span class="service-tag">Animation</span>
+          <span class="service-tag">3D</span>
+          <span class="service-tag">Direction</span>
+        </div>
+        <span class="service-arrow">→</span>
+      </div>
+      <div class="service-item reveal">
+        <span class="service-num">04</span>
+        <span class="service-name">Campaign Strategy</span>
+        <div class="service-tags">
+          <span class="service-tag">Social</span>
+          <span class="service-tag">Ads</span>
+          <span class="service-tag">Copy</span>
+        </div>
+        <span class="service-arrow">→</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- WORK -->
+  <section class="work" id="work">
+    <div class="section-header reveal">
+      <h2 class="section-title">Selected Work</h2>
+      <span class="section-count">06 / PROJECTS</span>
+    </div>
+    <div class="work-grid">
+      <div class="work-card reveal">
+        <div class="work-card-bg card-1"><div class="card-grid-deco"></div></div>
+        <div class="work-card-content">
+          <p class="work-category">Brand Identity · 2024</p>
+          <h3 class="work-title">Noctis Financial<br>Rebrand</h3>
+        </div>
+      </div>
+      <div class="work-card reveal">
+        <div class="work-card-bg card-2"><div class="card-grid-deco"></div></div>
+        <div class="work-card-content">
+          <p class="work-category">Web Design · 2024</p>
+          <h3 class="work-title">Amber Labs<br>Platform</h3>
+        </div>
+      </div>
+      <div class="work-card reveal">
+        <div class="work-card-bg card-3"><div class="card-grid-deco"></div></div>
+        <div class="work-card-content">
+          <p class="work-category">Campaign · 2023</p>
+          <h3 class="work-title">Verdant<br>Launch</h3>
+        </div>
+      </div>
+      <div class="work-card reveal">
+        <div class="work-card-bg card-4"><div class="card-grid-deco"></div></div>
+        <div class="work-card-content">
+          <p class="work-category">Motion · 2023</p>
+          <h3 class="work-title">Prisma<br>Title Sequence</h3>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section" id="contact">
+    <div class="cta-bg-text">LET'S GO</div>
+    <h2 class="cta-title">Ready to<br>Make Noise?</h2>
+    <a href="mailto:hello@vexora.studio" class="btn-dark">Start a Project →</a>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">Vex<span>o</span>ra</div>
+    <p class="footer-copy">© 2024 Vexora Studio. All rights reserved.</p>
+    <ul class="footer-links">
+      <li><a href="#">Instagram</a></li>
+      <li><a href="#">Dribbble</a></li>
+      <li><a href="#">Twitter/X</a></li>
+      <li><a href="#">LinkedIn</a></li>
+    </ul>
+  </footer>
+
+  <script>
+    // Custom cursor
+    const cursor = document.getElementById('cursor');
+    const ring = document.getElementById('cursorRing');
+    let mx = 0, my = 0, rx = 0, ry = 0;
+
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      cursor.style.left = mx + 'px';
+      cursor.style.top = my + 'px';
+    });
+
+    function lerpCursor() {
+      rx += (mx - rx) * 0.12;
+      ry += (my - ry) * 0.12;
+      ring.style.left = rx + 'px';
+      ring.style.top = ry + 'px';
+      requestAnimationFrame(lerpCursor);
+    }
+    lerpCursor();
+
+    document.querySelectorAll('a, button, .service-item, .work-card').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cursor.style.transform = 'translate(-50%,-50%) scale(2.5)';
+        ring.style.width = '60px';
+        ring.style.height = '60px';
+      });
+      el.addEventListener('mouseleave', () => {
+        cursor.style.transform = 'translate(-50%,-50%) scale(1)';
+        ring.style.width = '36px';
+        ring.style.height = '36px';
+      });
+    });
+
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 80);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    reveals.forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
